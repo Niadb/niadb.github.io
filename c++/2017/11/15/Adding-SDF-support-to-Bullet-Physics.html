@@ -111,7 +111,7 @@
 
 <p>I decide which object will act as the point hull based on who has the smaller point hull radius, this ensures consistant collision, and allows for the smaller object to collide against the larger objects full SDF.</p>
 
-<p>For the world/terrain shape I disable the point hull generation pass, it is always treated as the SDF which colliding.</p>
+<p>For the world/terrain shape I disable the point hull generation pass, it is always treated as the SDF when colliding.</p>
 
 <p>For points that are found to be colliding, a second pass is run to generate the normal and collision depth, and to reduce the number of impact points down to four(this is the number of points bullet wants fed to it).</p>
 
