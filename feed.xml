@@ -1,46 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2017-12-25T01:49:58-07:00</updated><id>http://localhost:4000/</id><title type="html">Comehither</title><subtitle>Game Dev, Programming, SIMD, GPU, Voxels</subtitle><entry><title type="html">Items</title><link href="http://localhost:4000/game/2017/12/23/Items.html" rel="alternate" type="text/html" title="Items" /><published>2017-12-23T10:20:08-07:00</published><updated>2017-12-23T10:20:08-07:00</updated><id>http://localhost:4000/game/2017/12/23/Items</id><content type="html" xml:base="http://localhost:4000/game/2017/12/23/Items.html">&lt;p&gt;Goal:
-   Add a system vaguely in line with minecrafts redstone, but not block based.
-Instead we will have special items that have a specific behavior, such as switches, detectors(light,sound etc), and power lines(aka redstone dust).&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2018-01-02T08:51:30-07:00</updated><id>http://localhost:4000/</id><title type="html">Comehither</title><subtitle>Game Dev, Programming, SIMD, GPU, Voxels</subtitle><entry><title type="html">Choosing a PBR Texture Format</title><link href="http://localhost:4000/gpu/2017/11/27/GPU-Texture-Format-for-PBR.html" rel="alternate" type="text/html" title="Choosing a PBR Texture Format" /><published>2017-11-27T10:20:08-07:00</published><updated>2017-11-27T10:20:08-07:00</updated><id>http://localhost:4000/gpu/2017/11/27/GPU%20Texture%20Format%20for%20PBR</id><content type="html" xml:base="http://localhost:4000/gpu/2017/11/27/GPU-Texture-Format-for-PBR.html">&lt;p&gt;&lt;strong&gt;Objective&lt;/strong&gt;: &lt;em&gt;encode a full &lt;a href=&quot;https://www.allegorithmic.com/pbr-guide&quot;&gt;PBR&lt;/a&gt; (physically-based rendering) set of channels into as few bits as possible, with good performance&lt;/em&gt;.&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Items triggered by an event&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;These may be triggered by an input signal event.&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Bomb: an item that will explode, tearing a hole in the surroundings, and throwing debris&lt;/li&gt;
-  &lt;li&gt;Force: an item that will apply a force to anything in front of it. If it is attached to something, it will push it in the opposite direction. Force is based on input power.&lt;/li&gt;
-  &lt;li&gt;Light: an item that lights up&lt;/li&gt;
-  &lt;li&gt;Sound: an item that makes a specific sound&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;strong&gt;Signal&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Signals are transmitted from item to item. One item may emit a signal that another can process&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Lines/Transmitters&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;Lines are used to attach items to each other, they transmit signals.&lt;/p&gt;
-
-&lt;p&gt;These will not be physical power lines like in the real world.&lt;/p&gt;
-
-&lt;p&gt;Properties of lines&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;A beam or partical stream will attach the two items.&lt;/li&gt;
-  &lt;li&gt;They have a range, if the items become to far apart, the line is broken&lt;/li&gt;
-  &lt;li&gt;Some may act on a simple radius&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Each item will have attachment slots where a line&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Signal gates&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;These allow for the player to implement basic logic to decide what to do when multiple signals are involved&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;OR:&lt;/li&gt;
-  &lt;li&gt;AND&lt;/li&gt;
-  &lt;li&gt;XOR&lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><summary type="html">Goal: Add a system vaguely in line with minecrafts redstone, but not block based. Instead we will have special items that have a specific behavior, such as switches, detectors(light,sound etc), and power lines(aka redstone dust).</summary></entry><entry><title type="html">Choosing a PBR Texture Format</title><link href="http://localhost:4000/gpu/2017/11/27/GPU-Texture-Format-for-PBR.html" rel="alternate" type="text/html" title="Choosing a PBR Texture Format" /><published>2017-11-27T10:20:08-07:00</published><updated>2017-11-27T10:20:08-07:00</updated><id>http://localhost:4000/gpu/2017/11/27/GPU%20Texture%20Format%20for%20PBR</id><content type="html" xml:base="http://localhost:4000/gpu/2017/11/27/GPU-Texture-Format-for-PBR.html">&lt;p&gt;&lt;strong&gt;Objective&lt;/strong&gt;: &lt;em&gt;encode a full &lt;a href=&quot;https://www.allegorithmic.com/pbr-guide&quot;&gt;PBR&lt;/a&gt; (physically-based rendering) set of channels into as few bits as possible, with good performance&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/greenshadow.jpg&quot; alt=&quot;Using PBR textures&quot; /&gt;
+&lt;strong&gt;Game after PBR textures were added&lt;/strong&gt;
+&lt;img src=&quot;http://localhost:4000/assets/metals.jpg&quot; alt=&quot;Metals&quot; /&gt;
+&lt;strong&gt;Metals are visible here&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;Performance tests on my AMD GPU show that each additional texture adds significant cost, using 3 textures to encode the PBR signal with a size of 2 bytes per texel is much more costly than 2 textures at the same overall number of bytes per texel.&lt;/p&gt;
 
@@ -131,7 +94,82 @@ When bit compressed, in this case with zstd, the BC7 files are generally about 1
   &lt;li&gt;
     &lt;p&gt;The normals in the normal map are in euclidean space, this wastes bits since some values are never used. Octahedral coordinates make better use of the available bits, and decoding isn’t really much different.&lt;/p&gt;
   &lt;/li&gt;
-&lt;/ol&gt;</content><author><name></name></author><summary type="html">Objective: encode a full PBR (physically-based rendering) set of channels into as few bits as possible, with good performance.</summary></entry><entry><title type="html">Relative Vertex Normals</title><link href="http://localhost:4000/gpu/2017/11/05/Higher-Quality-Vertex-Normals.html" rel="alternate" type="text/html" title="Relative Vertex Normals" /><published>2017-11-05T10:20:08-07:00</published><updated>2017-11-05T10:20:08-07:00</updated><id>http://localhost:4000/gpu/2017/11/05/Higher%20Quality%20Vertex%20Normals</id><content type="html" xml:base="http://localhost:4000/gpu/2017/11/05/Higher-Quality-Vertex-Normals.html">&lt;p&gt;I use the &lt;a href=&quot;http://jcgt.org/published/0003/02/01/paper.pdf&quot;&gt;Oct16&lt;/a&gt; format to encode my vertex normals, this format is two 8 bit channels in octahedral mapping.&lt;/p&gt;
+  &lt;li&gt;
+    &lt;p&gt;The metal channel is often not used, so for many textures it is possible to reuse this channel to store something else, such as anisotropic roughness or subsurface information.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;</content><author><name></name></author><summary type="html">Objective: encode a full PBR (physically-based rendering) set of channels into as few bits as possible, with good performance.</summary></entry><entry><title type="html">Adding SDF Collision to Bullet Physics</title><link href="http://localhost:4000/c++/2017/11/15/Adding-SDF-support-to-Bullet-Physics.html" rel="alternate" type="text/html" title="Adding SDF Collision to Bullet Physics" /><published>2017-11-15T10:20:08-07:00</published><updated>2017-11-15T10:20:08-07:00</updated><id>http://localhost:4000/c++/2017/11/15/Adding%20SDF%20support%20to%20Bullet%20Physics</id><content type="html" xml:base="http://localhost:4000/c++/2017/11/15/Adding-SDF-support-to-Bullet-Physics.html">&lt;p&gt;&lt;a href=&quot;http://bulletphysics.org/wordpress/&quot;&gt;Bullet Physics&lt;/a&gt; is an open source physics engine that is sometimes used for games and movies.&lt;/p&gt;
+
+&lt;p&gt;It supports many near phase collision types such as spheres, boxes, capsules, triangle meshes and convex hulls.&lt;/p&gt;
+
+&lt;p&gt;None of these were a good match for my signed distance fields(&lt;a href=&quot;https://en.wikipedia.org/wiki/Signed_distance_function&quot;&gt;SDF&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;Triangle meshes might seem like a solution, but they have two obvious isssues.&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;No volume which leads to penetration issues and bad collision detection&lt;/li&gt;
+  &lt;li&gt;Uses lots of memory to store the mesh&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Convex hulls might also seem like a solution, but also have a downsides&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;They only work with convex data. To work with concave data you must generate multiple hulls and stick them together.&lt;/li&gt;
+  &lt;li&gt;Not very accurate representation of the original shape unless you stitch &lt;em&gt;many&lt;/em&gt; of them together, this would be infeasible for the world/terrain shape which is many kilometers in size&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;So I decided to extend bullet to directly support &lt;a href=&quot;https://en.wikipedia.org/wiki/Signed_distance_function&quot;&gt;SDF&lt;/a&gt; vs &lt;a href=&quot;https://en.wikipedia.org/wiki/Signed_distance_function&quot;&gt;SDF&lt;/a&gt; collision.&lt;/p&gt;
+
+&lt;p&gt;As everything in my game world is represented by an &lt;a href=&quot;https://en.wikipedia.org/wiki/Signed_distance_function&quot;&gt;SDF&lt;/a&gt;, I do not need any of bullets built in collision types and only use &lt;a href=&quot;https://en.wikipedia.org/wiki/Signed_distance_function&quot;&gt;SDF&lt;/a&gt; vs &lt;a href=&quot;https://en.wikipedia.org/wiki/Signed_distance_function&quot;&gt;SDF&lt;/a&gt; collision.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Collision Algorithm&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The solution I went with is based on generating a point hull for the SDF, a point hull is a list of points that lie within the shapes negative space. 
+   In my implemenation all points in a given hull uses the same radius.&lt;/p&gt;
+
+&lt;p&gt;To peform collision detection between two SDFs, you treat one of them as a point hull and the other as an SDF. You transform each point in the point hull into the space of the SDF and sample the SDF. If the distance to the negative space is &amp;lt;= the point hulls radius, you have a collision.&lt;/p&gt;
+
+&lt;p&gt;I decide which object will act as the point hull based on who has the smaller point hull radius, this ensures consistant collision, and allows for the smaller object to collide against the larger objects full SDF.&lt;/p&gt;
+
+&lt;p&gt;For the world/terrain shape I disable the point hull generation pass, it is always treated as the SDF which colliding.&lt;/p&gt;
+
+&lt;p&gt;For points that are found to be colliding, a second pass is run to generate the normal and collision depth, and to reduce the number of impact points down to four(this is the number of points bullet wants fed to it).&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Result&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;SDF vs SDF supports both convex and concave shapes.&lt;/p&gt;
+
+&lt;p&gt;It also has fewer issues with penetration than triangle meshes since SDFs have proper volume, even if a small object pentrates into  a larger one, it will still be pushed out in the correct direction.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/shapeforpointhull.jpg&quot; alt=&quot;SDFShape Global&quot; /&gt;
+  Here is a shape for which we will generate a point hull&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/pointhull.jpg&quot; alt=&quot;SDFShape Global&quot; /&gt;
+  And here is a visualization of the point hull.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Optimizations&lt;/strong&gt; &lt;em&gt;sometimes known as midphase&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;There are numerious ways to optimize this, but here are some that I use. The underlying SDF algorithms are already all SIMD, so this is focused on algorithmic optimizations.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Surface Approximate&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Instead of sampling the full SDF against all of the points, I first run a pass that only samples eight points on the point hulls AABB within the SDF.  It then uses those eight points to peform a quick rejection of points that incapable of colliding because they are too far away. This often illiminates &amp;gt;90% of the points, so we can skip full SDF evaluation.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Temporal Collision Sphere&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;This is a sphere that is specific to a given object vs object collision, it records a rough approximation of the previous collision attempt between the two shapes. If not enough movement or rotation has occured it can early out and skip performing the full near phase.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Handling SDFs with broken disance formulas&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Some SDFs do not have euclidean correct distances, for these cases I run a fixup step which calculates a correction factor based on the rate of change in the local space of the SDF.&lt;/p&gt;
+
+&lt;p&gt;My correction algorithm takes the distances calculated for the AABB of the point hull projected into the SDFs space, and compares the true distance between the points against the distance returned by the SDF. It compares all of the points against each other, and uses the largest ratio of (sdf distance/true distance) as the correction factor.&lt;/p&gt;
+
+&lt;p&gt;This allows for colliding against fractals etc which often have incorrect distance formulas.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Future Work&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;The algorithm for placing points within the hull could always use more work.&lt;/li&gt;
+  &lt;li&gt;It might also be worth looking into storing a per point radius, this will allow for less points in some situations&lt;/li&gt;
+&lt;/ol&gt;</content><author><name></name></author><summary type="html">Bullet Physics is an open source physics engine that is sometimes used for games and movies.</summary></entry><entry><title type="html">Relative Vertex Normals</title><link href="http://localhost:4000/gpu/2017/11/05/Higher-Quality-Vertex-Normals.html" rel="alternate" type="text/html" title="Relative Vertex Normals" /><published>2017-11-05T10:20:08-07:00</published><updated>2017-11-05T10:20:08-07:00</updated><id>http://localhost:4000/gpu/2017/11/05/Higher%20Quality%20Vertex%20Normals</id><content type="html" xml:base="http://localhost:4000/gpu/2017/11/05/Higher-Quality-Vertex-Normals.html">&lt;p&gt;I use the &lt;a href=&quot;http://jcgt.org/published/0003/02/01/paper.pdf&quot;&gt;Oct16&lt;/a&gt; format to encode my vertex normals, this format is two 8 bit channels in octahedral mapping.&lt;/p&gt;
 
 &lt;p&gt;Most of the time this was sufficient, but under certain conditions artifacts were visible– such as the surface of a smoothly varying sphere using triplanar texturing, whose weights are based on the normals.&lt;/p&gt;
 
@@ -252,7 +290,15 @@ This method is very fast and works well if you have an AMD card that supports it
 &lt;p&gt;&lt;strong&gt;Embed Into Vertex Data&lt;/strong&gt;: Another option is to enlarge the vertex, and embed the barycentric coordinates and the 3 materials directly into it.
  This is probably a better fallback than the GS, although it does have the downside of reducing vertex reuse, since many vertices that were previously identical would now differ.&lt;/p&gt;
 
-&lt;p&gt;&lt;em&gt;Domain Shader?&lt;/em&gt;: I haven’t tried this method, but I think it might be possible to pass down barycentric coordinates from a domain shader&lt;/p&gt;</content><author><name></name></author><summary type="html">Recently I was in need a way to perform smooth blending between per vertex materials.</summary></entry><entry><title type="html">AVX2 Gather Performance</title><link href="http://localhost:4000/avx/2017/10/15/AVX2-Gather.html" rel="alternate" type="text/html" title="AVX2 Gather Performance" /><published>2017-10-15T11:20:08-06:00</published><updated>2017-10-15T11:20:08-06:00</updated><id>http://localhost:4000/avx/2017/10/15/AVX2%20Gather</id><content type="html" xml:base="http://localhost:4000/avx/2017/10/15/AVX2-Gather.html">&lt;p&gt;&lt;strong&gt;Masked Gather vs Unmasked Gather&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Domain Shader?&lt;/em&gt;: I haven’t tried this method, but I think it might be possible to pass down barycentric coordinates from a domain shader&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Visual Comparison&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/barycentrics_on.jpg&quot; alt=&quot;BaryOn&quot; /&gt;
+ &lt;em&gt;Ground rendered using barycentrics to perform smooth blending between materials&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;http://localhost:4000/assets/barycentrics_off.jpg&quot; alt=&quot;BaryOff&quot; /&gt;
+  &lt;em&gt;Ground rendered without barycentrics, the material is selected from the base vertex and there is no blending between materials&lt;/em&gt;&lt;/p&gt;</content><author><name></name></author><summary type="html">Recently I was in need a way to perform smooth blending between per vertex materials.</summary></entry><entry><title type="html">AVX2 Gather Performance</title><link href="http://localhost:4000/avx/2017/10/15/AVX2-Gather.html" rel="alternate" type="text/html" title="AVX2 Gather Performance" /><published>2017-10-15T11:20:08-06:00</published><updated>2017-10-15T11:20:08-06:00</updated><id>http://localhost:4000/avx/2017/10/15/AVX2%20Gather</id><content type="html" xml:base="http://localhost:4000/avx/2017/10/15/AVX2-Gather.html">&lt;p&gt;&lt;strong&gt;Masked Gather vs Unmasked Gather&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;AVX2 has masked gather instructions(&lt;a href=&quot;https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm_mask_i32gather_epi32&amp;amp;expand=2810,2810&quot;&gt;_mm_mask_i32gather_epi32&lt;/a&gt; etc), these have two additional parameters, a mask, and a default value that is used when the mask is false.&lt;/p&gt;
 
