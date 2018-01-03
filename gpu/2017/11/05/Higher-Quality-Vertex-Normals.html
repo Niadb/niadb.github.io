@@ -85,9 +85,8 @@
 <p>Most of the time this was sufficient, but under certain conditions artifacts were visible– such as the surface of a smoothly varying sphere using triplanar texturing, whose weights are based on the normals.</p>
 
 <p>Here is a visualization of the Triplanar weights generated from the Oct16 normals.
-<img src="http://localhost:4000/assets/oct16_bad.jpg" alt="Oct16 Global" /></p>
-
-<p>There is a very obvious diamond pattern visible.
+<img src="http://localhost:4000/assets/oct16_bad.jpg" alt="Oct16 Global" />
+There is a very obvious diamond pattern visible.
 Even switching to Oct20(10 bits per channel) does not completely solve this, the diamonds are much smaller, but they persist.</p>
 
 <p><strong>Solution:</strong> Use custom scale/bias to transform into relative coordinates
