@@ -10,7 +10,7 @@
   <meta name="description" content="Here is a method I created to improve performance when using Triplanar texturing. I also think it looks better.">
 
   <link rel="stylesheet" href="/assets/main.css">
-  <link rel="canonical" href="http://localhost:4000/gpu/2017/11/01/Faster-Triplanar-Texturing.html">
+  <link rel="canonical" href="https://niadb.github.io/gpu/2017/11/01/Faster-Triplanar-Texturing.html">
   <link rel="alternate" type="application/rss+xml" title="Comehither" href="/feed.xml">
   
   
@@ -94,7 +94,7 @@ I also think it looks better.</p>
 <span class="p">}</span></code></pre></figure>
 
 <p>If we visualize the blend zones this is what it looks like.
-<img src="http://localhost:4000/assets/triplanar2.jpg" alt="Blend Zones" /></p>
+<img src="https://niadb.github.io/assets/triplanar2.jpg" alt="Blend Zones" /></p>
 
 <p>Red/Green/Blue represent one texture sample.</p>
 
@@ -109,7 +109,7 @@ I also think it looks better.</p>
 <p>This results in needless texture sampling along aligned edges, stealing away our precious bandwidth.</p>
 
 <p>Constant Blend Width
-<img src="http://localhost:4000/assets/triplanar3.jpg" alt="Constant Blend Width" /></p>
+<img src="https://niadb.github.io/assets/triplanar3.jpg" alt="Constant Blend Width" /></p>
 
 <p>What we want is something more like this– constant blend width.</p>
 

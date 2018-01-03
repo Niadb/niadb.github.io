@@ -10,7 +10,7 @@
   <meta name="description" content="I use the Oct16 format to encode my vertex normals, this format is two 8 bit channels in octahedral mapping.">
 
   <link rel="stylesheet" href="/assets/main.css">
-  <link rel="canonical" href="http://localhost:4000/gpu/2017/11/05/Higher-Quality-Vertex-Normals.html">
+  <link rel="canonical" href="https://niadb.github.io/gpu/2017/11/05/Higher-Quality-Vertex-Normals.html">
   <link rel="alternate" type="application/rss+xml" title="Comehither" href="/feed.xml">
   
   
@@ -85,12 +85,12 @@
 <p>Most of the time this was sufficient, but under certain conditions artifacts were visible– such as the surface of a smoothly varying sphere using triplanar texturing, whose weights are based on the normals.</p>
 
 <p>Here is a visualization of the Triplanar weights generated from the Oct16 normals.
-<img src="http://localhost:4000/assets/oct16_bad.jpg" alt="Oct16 Global" />
+<img src="https://niadb.github.io/assets/oct16_bad.jpg" alt="Oct16 Global" />
 There is a very obvious diamond pattern visible.
 Even switching to Oct20(10 bits per channel) does not completely solve this, the diamonds are much smaller, but they persist.</p>
 
 <p><strong>Solution:</strong> Use custom scale/bias to transform into relative coordinates
-<img src="http://localhost:4000/assets/oct16_good.jpg" alt="Oct16 Relative" /></p>
+<img src="https://niadb.github.io/assets/oct16_good.jpg" alt="Oct16 Relative" /></p>
 
 <p>Instead of adding bits, I decided to take advantage of the fact that most triangle patches only use a
 limited range of the world space normals.</p>

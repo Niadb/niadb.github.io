@@ -10,7 +10,7 @@
   <meta name="description" content="Objective: encode a full PBR (physically-based rendering) set of channels into as few bits as possible, with good performance.">
 
   <link rel="stylesheet" href="/assets/main.css">
-  <link rel="canonical" href="http://localhost:4000/gpu/2017/11/27/GPU-Texture-Format-for-PBR.html">
+  <link rel="canonical" href="https://niadb.github.io/gpu/2017/11/27/GPU-Texture-Format-for-PBR.html">
   <link rel="alternate" type="application/rss+xml" title="Comehither" href="/feed.xml">
   
   
@@ -82,9 +82,9 @@
   <div class="post-content" itemprop="articleBody">
     <p><strong>Objective</strong>: <em>encode a full <a href="https://www.allegorithmic.com/pbr-guide">PBR</a> (physically-based rendering) set of channels into as few bits as possible, with good performance</em>.</p>
 
-<p><img src="http://localhost:4000/assets/greenshadow.jpg" alt="Using PBR textures" />
+<p><img src="https://niadb.github.io/assets/greenshadow.jpg" alt="Using PBR textures" />
 <strong>Game after PBR textures were added</strong>
-<img src="http://localhost:4000/assets/metals.jpg" alt="Metals" />
+<img src="https://niadb.github.io/assets/metals.jpg" alt="Metals" />
 <strong>Metals are visible here</strong></p>
 
 <p>Performance tests on my AMD GPU show that each additional texture adds significant cost, using 3 textures to encode the PBR signal with a size of 2 bytes per texel is much more costly than 2 textures at the same overall number of bytes per texel.</p>
