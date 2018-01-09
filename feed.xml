@@ -1,4 +1,75 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.2">Jekyll</generator><link href="https://niadb.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://niadb.github.io/" rel="alternate" type="text/html" /><updated>2018-01-03T08:54:17-07:00</updated><id>https://niadb.github.io/</id><title type="html">Comehither</title><subtitle>Game Dev, Programming, SIMD, GPU, Voxels</subtitle><entry><title type="html">Choosing a PBR Texture Format</title><link href="https://niadb.github.io/gpu/2017/11/27/GPU-Texture-Format-for-PBR.html" rel="alternate" type="text/html" title="Choosing a PBR Texture Format" /><published>2017-11-27T10:20:08-07:00</published><updated>2017-11-27T10:20:08-07:00</updated><id>https://niadb.github.io/gpu/2017/11/27/GPU%20Texture%20Format%20for%20PBR</id><content type="html" xml:base="https://niadb.github.io/gpu/2017/11/27/GPU-Texture-Format-for-PBR.html">&lt;p&gt;&lt;strong&gt;Objective&lt;/strong&gt;: &lt;em&gt;encode a full &lt;a href=&quot;https://www.allegorithmic.com/pbr-guide&quot;&gt;PBR&lt;/a&gt; (physically-based rendering) set of channels into as few bits as possible, with good performance&lt;/em&gt;.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.2">Jekyll</generator><link href="https://niadb.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://niadb.github.io/" rel="alternate" type="text/html" /><updated>2018-01-09T12:27:25-07:00</updated><id>https://niadb.github.io/</id><title type="html">Comehither</title><subtitle>Game Dev, Programming, SIMD, GPU, Voxels</subtitle><entry><title type="html">Quasi Virtual Texturing System</title><link href="https://niadb.github.io/gpu/2017/12/04/Quasi-Virtual-Texturing-System.html" rel="alternate" type="text/html" title="Quasi Virtual Texturing System" /><published>2017-12-04T10:20:08-07:00</published><updated>2017-12-04T10:20:08-07:00</updated><id>https://niadb.github.io/gpu/2017/12/04/Quasi%20Virtual%20Texturing%20System</id><content type="html" xml:base="https://niadb.github.io/gpu/2017/12/04/Quasi-Virtual-Texturing-System.html">&lt;p&gt;This is an overview of a quasi virtual texturing system that I implemented for my game.&lt;/p&gt;
+
+&lt;p&gt;I use this system instead of a traditional virtual texturing system for the following reasons.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;Supports all levels of anisotropic/trilinear filtering, even on old hardware&lt;/li&gt;
+  &lt;li&gt;Doesn’t use &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/windows/desktop/dn786477(v=vs.85).aspx&quot;&gt;tiled resources&lt;/a&gt; which require newer GPUs, and aren’t available on Windows 7 with d3d11&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;&lt;strong&gt;Algorithm&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;This algorithm uses a fixed sized amount of memory for textures on the GPU.&lt;/p&gt;
+
+&lt;p&gt;I also limit all textures to square powers of 2,  the only sizes supported are 256,512,1024, and 2048.&lt;/p&gt;
+
+&lt;p&gt;I pre-generated a texture array that contains all of the mips of size 256 and under, for all textures.&lt;/p&gt;
+
+&lt;p&gt;I also allocate fixed sized arrays for 512,1024 and 2048; with the larger sizes having progressively fewer slots.&lt;/p&gt;
+
+&lt;p&gt;I’ll refer to each of these arrays as a layer.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Number of slots&lt;/em&gt; : Here are the number of slots I have per layer, these numbers are mostly arbitrary.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;256: # of textures&lt;/li&gt;
+  &lt;li&gt;512: 128 slots&lt;/li&gt;
+  &lt;li&gt;1024: 32 slots&lt;/li&gt;
+  &lt;li&gt;2048: 8 slots&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Here is a visualization of the layers.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://niadb.github.io/assets/virtual_texture_layers.jpg&quot; alt=&quot;SDFShape2&quot; /&gt;
+  &lt;em&gt;Yellow is 256, Green is 512, Blue is 1024, and Red is 2048.&lt;br /&gt;
+  I force everything to use 256 past a certain distance to reduce divergence&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;In addition a structured buffer is used as an indirection mapping; pass in the material ID, and retrieve which array to sample from(the layer), and which slot in the array.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Prioritizing Textures&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;As there is a limited number of high resolution textures that can be on the GPU at any given time, a system to was needed to determine which textures 
+  should be resident.&lt;/p&gt;
+
+&lt;p&gt;This is done by storing the N most important textures, along with a score, for each voxel patch.&lt;/p&gt;
+
+&lt;p&gt;The score is simple the number of vertices that reference the texture.&lt;/p&gt;
+
+&lt;p&gt;Each frame, for visible patches, the score is added to the appropriate textures/MIP based on the distance from the camera for the patch.&lt;/p&gt;
+
+&lt;p&gt;Patches which are out of the frustum or occluded do not get added.&lt;/p&gt;
+
+&lt;p&gt;The textures/mip with the highest score, that is not resident on the GPU is then considered for uploaded, if it has a higher score than a resident texture at the same mip level.&lt;/p&gt;
+
+&lt;p&gt;Only one texture is uploaded per frame, to limit the amount of data that needs to be transferred.&lt;/p&gt;
+
+&lt;p&gt;The structured buffer is also updated to reflect where the GPU can find the texture.&lt;/p&gt;
+
+&lt;p&gt;Latency is reduced by having the CPU side also store a cache of recently accessed textures, the caches size is adjustable, but is currently set to 300mb.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Results&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The system works well and transparently pages in texture data based on visibility.&lt;/p&gt;
+
+&lt;p&gt;It never suffers from horribly blurry textures since the 256 mips are always available as a fallback.&lt;/p&gt;
+
+&lt;p&gt;Even standing still and turning the camera around can and will cause textures to be paged in/out.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Limitations&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;D3d11 has a max texture array size of 2048. This means this system can only support 2048 separate materials. I am nowhere near this limit, so this isn’t an issue for me.&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">This is an overview of a quasi virtual texturing system that I implemented for my game. I use this system instead of a traditional virtual texturing system for the following reasons.</summary></entry><entry><title type="html">Choosing a PBR Texture Format</title><link href="https://niadb.github.io/gpu/2017/11/27/GPU-Texture-Format-for-PBR.html" rel="alternate" type="text/html" title="Choosing a PBR Texture Format" /><published>2017-11-27T10:20:08-07:00</published><updated>2017-11-27T10:20:08-07:00</updated><id>https://niadb.github.io/gpu/2017/11/27/GPU%20Texture%20Format%20for%20PBR</id><content type="html" xml:base="https://niadb.github.io/gpu/2017/11/27/GPU-Texture-Format-for-PBR.html">&lt;p&gt;&lt;strong&gt;Objective&lt;/strong&gt;: &lt;em&gt;encode a full &lt;a href=&quot;https://www.allegorithmic.com/pbr-guide&quot;&gt;PBR&lt;/a&gt; (physically-based rendering) set of channels into as few bits as possible, with good performance&lt;/em&gt;.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;https://niadb.github.io/assets/greenshadow.jpg&quot; alt=&quot;Using PBR textures&quot; /&gt;
 &lt;strong&gt;Game after PBR textures were added&lt;/strong&gt;
@@ -138,11 +209,12 @@ When bit compressed, in this case with zstd, the BC7 files are generally about 1
 
 &lt;p&gt;It also has fewer issues with penetration than triangle meshes since SDFs have proper volume, even if a small object pentrates into  a larger one, it will still be pushed out in the correct direction.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;https://niadb.github.io/assets/shapeforpointhull.jpg&quot; alt=&quot;SDFShape Global&quot; /&gt;
+&lt;p&gt;&lt;img src=&quot;https://niadb.github.io/assets/shapeforpointhull.jpg&quot; alt=&quot;SDFShape1&quot; /&gt;
   Here is a shape for which we will generate a point hull&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&quot;https://niadb.github.io/assets/pointhull.jpg&quot; alt=&quot;SDFShape Global2&quot; /&gt;
-  And here is a visualization of the point hull.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://niadb.github.io/assets/pointhull.jpg&quot; alt=&quot;SDFShape2&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;And here is a visualization of the point hull.&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Optimizations&lt;/strong&gt; &lt;em&gt;sometimes known as midphase&lt;/em&gt;&lt;/p&gt;
 
@@ -444,12 +516,82 @@ If more accuracy is needed, the sample rate can be increased.&lt;/p&gt;
 
 &lt;div class=&quot;PageNavigation&quot;&gt;
   
-    &lt;a class=&quot;prev&quot; href=&quot;/c++/2016/10/27/Cluster-Culling.html&quot;&gt;&amp;laquo; Cluster Culling&lt;/a&gt;
+    &lt;a class=&quot;prev&quot; href=&quot;/c++/2017/06/13/SDF-Based-Occlusion-Culling.html&quot;&gt;&amp;laquo; SDF Based Occlusion Culling&lt;/a&gt;
   
   
     &lt;a class=&quot;next&quot; href=&quot;/avx/2017/10/15/AVX2-Gather.html&quot;&gt;AVX2 Gather Performance &amp;raquo;&lt;/a&gt;
   
-&lt;/div&gt;</content><author><name></name></author><summary type="html">While adding physics support to my voxel engine I needed a reasonable accurate &amp;amp; fast method to calculate the moment of inertia, volume, and center of mass for an arbitrary distance field.</summary></entry><entry><title type="html">Cluster Culling</title><link href="https://niadb.github.io/c++/2016/10/27/Cluster-Culling.html" rel="alternate" type="text/html" title="Cluster Culling" /><published>2016-10-27T11:20:08-06:00</published><updated>2016-10-27T11:20:08-06:00</updated><id>https://niadb.github.io/c++/2016/10/27/Cluster%20Culling</id><content type="html" xml:base="https://niadb.github.io/c++/2016/10/27/Cluster-Culling.html">&lt;p&gt;AMD’s GPUOpen has an article on &lt;a href=&quot;http://gpuopen.com/geometryfx-1-2-cluster-culling/&quot;&gt;Cluster Culling&lt;/a&gt;
+&lt;/div&gt;</content><author><name></name></author><summary type="html">While adding physics support to my voxel engine I needed a reasonable accurate &amp;amp; fast method to calculate the moment of inertia, volume, and center of mass for an arbitrary distance field.</summary></entry><entry><title type="html">SDF Based Occlusion Culling</title><link href="https://niadb.github.io/c++/2017/06/13/SDF-Based-Occlusion-Culling.html" rel="alternate" type="text/html" title="SDF Based Occlusion Culling" /><published>2017-06-13T11:20:08-06:00</published><updated>2017-06-13T11:20:08-06:00</updated><id>https://niadb.github.io/c++/2017/06/13/SDF%20Based%20Occlusion%20Culling</id><content type="html" xml:base="https://niadb.github.io/c++/2017/06/13/SDF-Based-Occlusion-Culling.html">&lt;p&gt;I’m going to describe an occlusion culling algorithm I came up with about 4 or 5 years ago. I use it in my game and it has worked well for me.&lt;/p&gt;
+
+&lt;p&gt;If you do not know what occlusion culling is, it is culling objects that are in the frustum, but are blocked from the users view, and do not contribute to the scene.&lt;/p&gt;
+
+&lt;p&gt;Prior to this I used a Software Rasterizer based implementation, but I found that it was problematic for the following reasons.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;em&gt;Low resolution&lt;/em&gt;: not a huge issue, but it is much lower resolution than the GPU rasterizer so it isn’t completely correct&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;False Occlusion&lt;/em&gt;: since my occluders had to be auto generated at run time from arbitrary SDFs, I used a convex hull approximation which was not always conservative,
+ this caused some false occlusion&lt;/li&gt;
+  &lt;li&gt;&lt;em&gt;Memory&lt;/em&gt;: each occluder had its own set of triangles that needed to be stored. Also meant jumping around in memory to access each of these sets.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;SDF Occlusion Algorithm Overview&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;My scene is represented with triangular patches, each containing perhaps 500 to 2000 triangles. They are approximately equal size in screen space.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://niadb.github.io/assets/patches_show.jpg&quot; alt=&quot;SDFShape2&quot; /&gt;
+  &lt;em&gt;I’ve scaled the patches down here so that we can see gaps between them&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Basically we want to shoot rays from the viewers eye to each patch.&lt;/p&gt;
+
+&lt;p&gt;Because our scene is represented with a signed distance field, we always know the distance to the nearest surface.&lt;/p&gt;
+
+&lt;p&gt;If there is ever a point along the ray where we are inside of something, and the distance to the surface is sufficient to occlude our patch, we know the patch isn’t visible.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Optimizing to make it practical&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;The number of patches depends on the settings, but a typical number after frustum culling might be 10,000.&lt;/p&gt;
+
+&lt;p&gt;Shooting 10,000 rays through complex SDFs is quite slow, thankfully it is turns out that each frame is generally very similar to the previous, so we can take advantage of temporal stability.&lt;/p&gt;
+
+&lt;p&gt;Typically I only end up tracing around 100 rays per frame.&lt;/p&gt;
+
+&lt;p&gt;This is done by tracking previous occlusion results, and storing a sphere that represents the most occluded point.&lt;/p&gt;
+
+&lt;p&gt;The next time around, for patches that were occluded, we can quickly retest them without needing the SDF, by using a sphere occludes sphere test.&lt;/p&gt;
+
+&lt;p&gt;If that fails, we can still optimize by starting the ray test near the point of previous occlusion.&lt;/p&gt;
+
+&lt;p&gt;For patches that were previously not occluded, we can actually perform a fairly similar test, if there hasn’t been enough relative movement, there is no need to test the SDF, and we can assume the object is visible.&lt;/p&gt;
+
+&lt;p&gt;I differentiate between dynamic and static parts of the scene, as these temporal tests only work reliable for the static part.&lt;/p&gt;
+
+&lt;p&gt;I also use a timer to set a max time that this tracing process can run per frame.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Other Benefits&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;I track an occlusion ratio for each patch, this is between 0 and 1.&lt;/p&gt;
+
+&lt;p&gt;So even if something isn’t completely occluded I can still tell when it is partially occluded.&lt;/p&gt;
+
+&lt;p&gt;I use this occlusion ratio to adjust the priority for patch splitting and generation.&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Patches that are completely occluded are never split.&lt;/li&gt;
+  &lt;li&gt;Patches that are partially occluded, have a much lower score/priority, and won’t split until the user gets closer.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;Future Work&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Dynamic objects are occluded by static objects, but I haven’t yet added the code for dynamic objects to occlude anything.
+   It isn’t terribly difficult, but I don’t think it will contribute much so I haven’t prioritized that work.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Potential downsides&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;While this algorithm works well for me, this is largely due to the precise way that may engine works, it is probably not well suited to a more typical game engine like Unreal which does not work based on equally sized in screen space triangular patches.&lt;/li&gt;
+  &lt;li&gt;Thin objects don’t occlude as well as a software rasterizer based implementation, this is because it relies on the object having volume&lt;/li&gt;
+  &lt;li&gt;Occluder fusion isn’t the best&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">I’m going to describe an occlusion culling algorithm I came up with about 4 or 5 years ago. I use it in my game and it has worked well for me. If you do not know what occlusion culling is, it is culling objects that are in the frustum, but are blocked from the users view, and do not contribute to the scene.</summary></entry><entry><title type="html">Cluster Culling</title><link href="https://niadb.github.io/c++/2016/10/27/Cluster-Culling.html" rel="alternate" type="text/html" title="Cluster Culling" /><published>2016-10-27T11:20:08-06:00</published><updated>2016-10-27T11:20:08-06:00</updated><id>https://niadb.github.io/c++/2016/10/27/Cluster%20Culling</id><content type="html" xml:base="https://niadb.github.io/c++/2016/10/27/Cluster-Culling.html">&lt;p&gt;AMD’s GPUOpen has an article on &lt;a href=&quot;http://gpuopen.com/geometryfx-1-2-cluster-culling/&quot;&gt;Cluster Culling&lt;/a&gt;
 &lt;img src=&quot;https://3.bp.blogspot.com/-ry8JKYdsmtQ/WG5fpoDbObI/AAAAAAAAGqk/zxwv8Y16KasQUo9UECAn3g5RdPG02N5ZwCLcB/s1600/geometry-fx.png&quot; alt=&quot;Oct16 Global&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Basically for a given mesh cluster, you can often perform a variant of backface culling on the entire cluster.&lt;/p&gt;
@@ -523,114 +665,4 @@ In a standard game engine with offline generated content the cull rate would lik
 &lt;/span&gt;		 &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nDv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_coneAngleCosine&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;l&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 	 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name></name></author><summary type="html">AMD’s GPUOpen has an article on Cluster Culling</summary></entry><entry><title type="html">AVX2 Array Compaction</title><link href="https://niadb.github.io/c++/2016/06/01/AVX2-How-to-pack-left.html" rel="alternate" type="text/html" title="AVX2 Array Compaction" /><published>2016-06-01T11:20:08-06:00</published><updated>2016-06-01T11:20:08-06:00</updated><id>https://niadb.github.io/c++/2016/06/01/AVX2%20How%20to%20pack%20left</id><content type="html" xml:base="https://niadb.github.io/c++/2016/06/01/AVX2-How-to-pack-left.html">&lt;p&gt;If you have an input array, and an output array, and you only want to write those elements which pass a condition, what is the most efficient way to do this with &lt;a href=&quot;https://en.wikipedia.org/wiki/Advanced_Vector_Extensions&quot;&gt;AVX2&lt;/a&gt;?&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Advanced_Vector_Extensions&quot;&gt;AVX2&lt;/a&gt; lacks a compaction instruction(it was added in &lt;a href=&quot;https://en.wikipedia.org/wiki/AVX-512&quot;&gt;AVX512&lt;/a&gt;: &lt;a href=&quot;https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm512_mask_compressstoreu_ps&amp;amp;expand=3942,1199&quot;&gt;_mm512_mask_compressstoreu_ps&lt;/a&gt;), so we have to emulate this somehow.&lt;/p&gt;
-
-&lt;p&gt;Here is a visualization of the problem:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://i.stack.imgur.com/YAkXa.png&quot; alt=&quot;Oct16 Global&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Here is a solution I came up with, using 3 bit compressed indices. It requires a LUT sized 769 bytes, so it is best suited for cases where you have a good sized array of data to work on.&lt;/p&gt;
-
-&lt;p&gt;This code is used to generate the index mask, once you have the mask you can perform the swizzle by calling &lt;a href=&quot;https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_permutevar8x32_ps&amp;amp;expand=3942&quot;&gt;_mm256_permutevar8x32_ps&lt;/a&gt;.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c--&quot; data-lang=&quot;c++&quot;&gt;&lt;span class=&quot;c1&quot;&gt;//Generate Move mask via: _mm256_movemask_ps(_mm256_castsi256_ps(mask)); etc
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__m256i&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;MoveMaskToIndices&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;moveMask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;u8&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;adr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g_pack_left_table_u8x3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;moveMask&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;__m256i&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;indices&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_mm256_set1_epi32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;reinterpret_cast&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;u32&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;adr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;//lower 24 bits has our LUT
-&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;__m256i&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;m&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_mm256_sllv_epi32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;indices&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_mm256_setr_epi32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;29&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;26&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;23&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;17&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;14&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-
-    &lt;span class=&quot;c1&quot;&gt;//now shift it right to get 3 bits at bottom
-&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;__m256i&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shufmask&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_mm256_srli_epi32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;m&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;29&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shufmask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;//The rest of this code to build the LUT
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;u32&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;get_nth_bits&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;u32&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;auto&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;|=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;out&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;u8&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;g_pack_left_table_u8x3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;256&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
-
-&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;BuildPackMask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;256&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-        &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;reinterpret_cast&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;u32&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&amp;gt;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;g_pack_left_table_u8x3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;get_nth_bits&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-    &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://stackoverflow.com/questions/36932240/avx2-what-is-the-most-efficient-way-to-pack-left-based-on-a-mask/36951611#36951611&quot;&gt;Peter Cordes&lt;/a&gt; took my 3 bit idea and dropped the requirement for a LUT by taking advantage of the new &lt;a href=&quot;https://en.wikipedia.org/wiki/Bit_Manipulation_Instruction_Sets&quot;&gt;BMI&lt;/a&gt; (bit manipulation) instruction set introduced with Haswell. 
-I had not used the BMI instructions before, so this was new to me.
- This code is x64 only, but you can port to x86 by using the vector shift approach I used in my solution, and the 3 bit indices instead of 8 bit.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c--&quot; data-lang=&quot;c++&quot;&gt;&lt;span class=&quot;c1&quot;&gt;// Uses 64bit pdep / pext to save a step in unpacking.
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__m256&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;compress256&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__m256&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;unsigned&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;mask&lt;/span&gt; &lt;span class=&quot;cm&quot;&gt;/* from movmskps */&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;kt&quot;&gt;uint64_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expanded_mask&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_pdep_u64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x0101010101010101&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// unpack each bit to a byte
-&lt;/span&gt;  &lt;span class=&quot;n&quot;&gt;expanded_mask&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0xFF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;// mask |= mask&amp;lt;&amp;lt;1 | mask&amp;lt;&amp;lt;2 | ... | mask&amp;lt;&amp;lt;7;
-&lt;/span&gt;  &lt;span class=&quot;c1&quot;&gt;// ABC... -&amp;gt; AAAAAAAABBBBBBBBCCCCCCCC...: replicate each bit to fill its byte
-&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;const&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;uint64_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;identity_indices&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x0706050403020100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;// the identity shuffle for vpermps, packed to one index per byte
-&lt;/span&gt;  &lt;span class=&quot;kt&quot;&gt;uint64_t&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;wanted_indices&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_pext_u64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;identity_indices&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;expanded_mask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-
-  &lt;span class=&quot;n&quot;&gt;__m128i&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bytevec&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_mm_cvtsi64_si128&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;wanted_indices&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;n&quot;&gt;__m256i&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shufmask&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_mm256_cvtepu8_epi32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;bytevec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-
-  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_mm256_permutevar8x32_ps&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;src&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shufmask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name></name></author><summary type="html">If you have an input array, and an output array, and you only want to write those elements which pass a condition, what is the most efficient way to do this with AVX2?</summary></entry><entry><title type="html">Hot reloading C++</title><link href="https://niadb.github.io/c++/2014/11/05/Hot-Reloading-C++.html" rel="alternate" type="text/html" title="Hot reloading C++" /><published>2014-11-05T10:20:08-07:00</published><updated>2014-11-05T10:20:08-07:00</updated><id>https://niadb.github.io/c++/2014/11/05/Hot%20Reloading%20C++</id><content type="html" xml:base="https://niadb.github.io/c++/2014/11/05/Hot-Reloading-C++.html">&lt;p&gt;Here is an approach to hot reloading C++.
-It is specific to Visual Studio.&lt;/p&gt;
-
-&lt;p&gt;This is useful if you want to rapidly iterate on some code, and don’t enjoy continually restarting and navigating the program to whatever state it needs to be in to test the change.&lt;/p&gt;
-
-&lt;p&gt;It is based upon swapping DLLs and requires the ability to serialize state.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;How it works&lt;/strong&gt;&lt;/p&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;User modifies a C++ source file&lt;/li&gt;
-  &lt;li&gt;File monitoring detects the change&lt;/li&gt;
-  &lt;li&gt;Determines which projects are effected by the change.&lt;/li&gt;
-  &lt;li&gt;Moves the existing DLL/PDB for those projects(they cannot be deleted as they are in use).&lt;/li&gt;
-  &lt;li&gt;Fires up MSBuild to compile projects&lt;/li&gt;
-  &lt;li&gt;Once Build Completes:&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;&lt;strong&gt;Build Fails&lt;/strong&gt;:(&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;Build errors are propagated into the Visual Studio IDE&lt;/li&gt;
-  &lt;li&gt;Have MSBuild dump out a text file containing the error msg
-I use this command: /fl2 /fl3 /flp2:logfile=JustErrors.log;errorsonly /flp3:logfile=JustWarnings.log;warningsonly”
-The msg is formated in a way that VS understands.&lt;/li&gt;
-  &lt;li&gt;Load the file in your game(JustErrors.log) and use OutputDebugStringA to print it, this propagates it to VS, the error is now visible in the errors view&lt;/li&gt;
-  &lt;li&gt;Old DLL/PDB moved back&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;strong&gt;Build Success&lt;/strong&gt;:&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;Serialize state contained within relevant DLLs(into process owned memory)&lt;/li&gt;
-  &lt;li&gt;Serializing and then unserializing the entire game state is the simplest route and avoids any potential conflicts with mixed state between DLL’s.&lt;/li&gt;
-  &lt;li&gt;Destroy state associated with DLLs, and then unload the DLLs&lt;/li&gt;
-  &lt;li&gt;Load new DLLs, create new state&lt;/li&gt;
-  &lt;li&gt;Unserialize old state into the new state&lt;/li&gt;
-  &lt;li&gt;Resume game&lt;/li&gt;
-  &lt;li&gt;Rebuilds triggered by this process generally take about 1-2 seconds for my application, the exact time will depend your code.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;em&gt;Visual Studio has an annoying bug where it keeps the PDB loaded even if you unload the associated DLL.  So you can’t delete the old PDB for any DLL you previously loaded, at least not while your game is running. Hopefully they fix this at some point.&lt;/em&gt;&lt;/p&gt;
-
-&lt;div class=&quot;PageNavigation&quot;&gt;
-  
-    &lt;a class=&quot;prev&quot; href=&quot;/c++/2014/10/04/Compiling-C++-quicklyin-Visual-Studio.html&quot;&gt;&amp;laquo; Compiling C++ quickly in Visual Studio&lt;/a&gt;
-  
-  
-    &lt;a class=&quot;next&quot; href=&quot;/c++/2016/06/01/AVX2-How-to-pack-left.html&quot;&gt;AVX2 Array Compaction &amp;raquo;&lt;/a&gt;
-  
-&lt;/div&gt;</content><author><name></name></author><summary type="html">Here is an approach to hot reloading C++. It is specific to Visual Studio.</summary></entry></feed>
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name></name></author><summary type="html">AMD’s GPUOpen has an article on Cluster Culling</summary></entry></feed>
