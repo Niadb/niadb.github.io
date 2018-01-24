@@ -1,10 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.2">Jekyll</generator><link href="https://niadb.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://niadb.github.io/" rel="alternate" type="text/html" /><updated>2018-01-09T12:27:25-07:00</updated><id>https://niadb.github.io/</id><title type="html">Comehither</title><subtitle>Game Dev, Programming, SIMD, GPU, Voxels</subtitle><entry><title type="html">Quasi Virtual Texturing System</title><link href="https://niadb.github.io/gpu/2017/12/04/Quasi-Virtual-Texturing-System.html" rel="alternate" type="text/html" title="Quasi Virtual Texturing System" /><published>2017-12-04T10:20:08-07:00</published><updated>2017-12-04T10:20:08-07:00</updated><id>https://niadb.github.io/gpu/2017/12/04/Quasi%20Virtual%20Texturing%20System</id><content type="html" xml:base="https://niadb.github.io/gpu/2017/12/04/Quasi-Virtual-Texturing-System.html">&lt;p&gt;This is an overview of a quasi virtual texturing system that I implemented for my game.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.6.2">Jekyll</generator><link href="https://niadb.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://niadb.github.io/" rel="alternate" type="text/html" /><updated>2018-01-24T08:21:17-07:00</updated><id>https://niadb.github.io/</id><title type="html">Comehither</title><subtitle>Game Dev, Programming, SIMD, GPU, Voxels</subtitle><entry><title type="html">Quasi Virtual Texturing System</title><link href="https://niadb.github.io/gpu/2017/12/04/Quasi-Virtual-Texturing-System.html" rel="alternate" type="text/html" title="Quasi Virtual Texturing System" /><published>2017-12-04T10:20:08-07:00</published><updated>2017-12-04T10:20:08-07:00</updated><id>https://niadb.github.io/gpu/2017/12/04/Quasi%20Virtual%20Texturing%20System</id><content type="html" xml:base="https://niadb.github.io/gpu/2017/12/04/Quasi-Virtual-Texturing-System.html">&lt;p&gt;This is an overview of a quasi virtual texturing system that I implemented for my game.&lt;/p&gt;
 
 &lt;p&gt;I use this system instead of a traditional virtual texturing system for the following reasons.&lt;/p&gt;
 
 &lt;ol&gt;
   &lt;li&gt;Supports all levels of anisotropic/trilinear filtering, even on old hardware&lt;/li&gt;
   &lt;li&gt;Doesn’t use &lt;a href=&quot;https://msdn.microsoft.com/en-us/library/windows/desktop/dn786477(v=vs.85).aspx&quot;&gt;tiled resources&lt;/a&gt; which require newer GPUs, and aren’t available on Windows 7 with d3d11&lt;/li&gt;
+  &lt;li&gt;I use triplanar texturing exclusively, and do not have traditional UVs&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;p&gt;&lt;strong&gt;Algorithm&lt;/strong&gt;&lt;/p&gt;
@@ -174,7 +175,7 @@ When bit compressed, in this case with zstd, the BC7 files are generally about 1
 
 &lt;p&gt;None of these were a good match for my signed distance fields(&lt;a href=&quot;https://en.wikipedia.org/wiki/Signed_distance_function&quot;&gt;SDF&lt;/a&gt;).&lt;/p&gt;
 
-&lt;p&gt;Triangle meshes might seem like a solution, but they have two obvious isssues.&lt;/p&gt;
+&lt;p&gt;Triangle meshes might seem like a solution, but they have two obvious issues.&lt;/p&gt;
 &lt;ol&gt;
   &lt;li&gt;No volume which leads to penetration issues and bad collision detection&lt;/li&gt;
   &lt;li&gt;Uses lots of memory to store the mesh&lt;/li&gt;
@@ -183,7 +184,7 @@ When bit compressed, in this case with zstd, the BC7 files are generally about 1
 &lt;p&gt;Convex hulls might also seem like a solution, but also have a downsides&lt;/p&gt;
 &lt;ol&gt;
   &lt;li&gt;They only work with convex data. To work with concave data you must generate multiple hulls and stick them together.&lt;/li&gt;
-  &lt;li&gt;Not very accurate representation of the original shape unless you stitch &lt;em&gt;many&lt;/em&gt; of them together, this would be infeasible for the world/terrain shape which is many kilometers in size&lt;/li&gt;
+  &lt;li&gt;Not very accurate representation of the original shape unless you stitch &lt;em&gt;many&lt;/em&gt; of them together, this would be infeasible for the world/terrain shape which is many kilometres in size&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;p&gt;So I decided to extend bullet to directly support &lt;a href=&quot;https://en.wikipedia.org/wiki/Signed_distance_function&quot;&gt;SDF&lt;/a&gt; vs &lt;a href=&quot;https://en.wikipedia.org/wiki/Signed_distance_function&quot;&gt;SDF&lt;/a&gt; collision.&lt;/p&gt;
@@ -193,11 +194,11 @@ When bit compressed, in this case with zstd, the BC7 files are generally about 1
 &lt;p&gt;&lt;strong&gt;Collision Algorithm&lt;/strong&gt;&lt;/p&gt;
 
 &lt;p&gt;The solution I went with is based on generating a point hull for the SDF, a point hull is a list of points that lie within the shapes negative space. 
-   In my implemenation all points in a given hull uses the same radius.&lt;/p&gt;
+   In my implementation all points in a given hull uses the same radius.&lt;/p&gt;
 
-&lt;p&gt;To peform collision detection between two SDFs, you treat one of them as a point hull and the other as an SDF. You transform each point in the point hull into the space of the SDF and sample the SDF. If the distance to the negative space is &amp;lt;= the point hulls radius, you have a collision.&lt;/p&gt;
+&lt;p&gt;To perform collision detection between two SDFs, you treat one of them as a point hull and the other as an SDF. You transform each point in the point hull into the space of the SDF and sample the SDF. If the distance to the negative space is &amp;lt;= the point hulls radius, you have a collision.&lt;/p&gt;
 
-&lt;p&gt;I decide which object will act as the point hull based on who has the smaller point hull radius, this ensures consistant collision, and allows for the smaller object to collide against the larger objects full SDF.&lt;/p&gt;
+&lt;p&gt;I decide which object will act as the point hull based on who has the smaller point hull radius, this ensures consistent collision, and allows for the smaller object to collide against the larger objects full SDF.&lt;/p&gt;
 
 &lt;p&gt;For the world/terrain shape I disable the point hull generation pass, it is always treated as the SDF when colliding.&lt;/p&gt;
 
@@ -207,7 +208,7 @@ When bit compressed, in this case with zstd, the BC7 files are generally about 1
 
 &lt;p&gt;SDF vs SDF supports both convex and concave shapes.&lt;/p&gt;
 
-&lt;p&gt;It also has fewer issues with penetration than triangle meshes since SDFs have proper volume, even if a small object pentrates into  a larger one, it will still be pushed out in the correct direction.&lt;/p&gt;
+&lt;p&gt;It also has fewer issues with penetration than triangle meshes since SDFs have proper volume, even if a small object penetrates into  a larger one, it will still be pushed out in the correct direction.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&quot;https://niadb.github.io/assets/shapeforpointhull.jpg&quot; alt=&quot;SDFShape1&quot; /&gt;
   Here is a shape for which we will generate a point hull&lt;/p&gt;
@@ -218,29 +219,62 @@ When bit compressed, in this case with zstd, the BC7 files are generally about 1
 
 &lt;p&gt;&lt;strong&gt;Optimizations&lt;/strong&gt; &lt;em&gt;sometimes known as midphase&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;There are numerious ways to optimize this, but here are some that I use. The underlying SDF algorithms are already all SIMD, so this is focused on algorithmic optimizations.&lt;/p&gt;
+&lt;p&gt;There are numerous ways to optimize this, but here are some that I use. The underlying SDF algorithms are already all SIMD, so this is focused on algorithmic optimizations.&lt;/p&gt;
 
 &lt;p&gt;&lt;em&gt;Surface Approximate&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;Instead of sampling the full SDF against all of the points, I first run a pass that only samples eight points on the point hulls AABB within the SDF.  It then uses those eight points to peform a quick rejection of points that incapable of colliding because they are too far away. This often illiminates &amp;gt;90% of the points, so we can skip full SDF evaluation.&lt;/p&gt;
+&lt;p&gt;Instead of sampling the full SDF against all of the points, I first run a pass that only samples eight points on the point hulls AABB within the SDF.  It then uses those eight points to perform a quick rejection of points that incapable of colliding because they are too far away. This often eliminates &amp;gt;90% of the points, so we can skip full SDF evaluation.&lt;/p&gt;
 
-&lt;p&gt;&lt;em&gt;Temporal Collision Sphere&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Temporal Collision Frame&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;This is a sphere that is specific to a given object vs object collision, it records a rough approximation of the previous collision attempt between the two shapes. If not enough movement or rotation has occured it can early out and skip performing the full near phase.&lt;/p&gt;
+&lt;p&gt;This is a frame that is specific to a given object vs object collision, it records a rough approximation of the previous collision attempt between the two shapes.
+ If not enough movement or rotation has occurred it can early out and skip performing the full near phase–the previous contact points are reused.&lt;/p&gt;
 
-&lt;p&gt;&lt;strong&gt;Handling SDFs with broken disance formulas&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Handling SDFs with broken distance formulas&lt;/strong&gt;&lt;/p&gt;
 
-&lt;p&gt;Some SDFs do not have euclidean correct distances, for these cases I run a fixup step which calculates a correction factor based on the rate of change in the local space of the SDF.&lt;/p&gt;
+&lt;p&gt;Otherwise known as &lt;a href=&quot;https://en.wikipedia.org/wiki/Lipschitz_continuity&quot;&gt;Lipschitz&lt;/a&gt; continuous– we want gradients whose magnitude is as close to 1 as possible.&lt;/p&gt;
+
+&lt;p&gt;Some SDFs do not have euclidean correct distances, for these cases I run a fix up step which calculates a correction factor based on the rate of change in the local space of the SDF.&lt;/p&gt;
 
 &lt;p&gt;My correction algorithm takes the distances calculated for the AABB of the point hull projected into the SDFs space, and compares the true distance between the points against the distance returned by the SDF. It compares all of the points against each other, and uses the largest ratio of (sdf distance/true distance) as the correction factor.&lt;/p&gt;
 
-&lt;p&gt;This allows for colliding against fractals etc which often have incorrect distance formulas.&lt;/p&gt;
+&lt;p&gt;This allows for colliding against fractals and other complex formulas, which often have incorrect distance formulas.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Performance Notes&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;In scenes with many moving &amp;amp; colliding objects:&lt;/p&gt;
+
+&lt;p&gt;Initially my SDF near phase and Bullets solver were about equal in cycle usage.&lt;/p&gt;
+
+&lt;p&gt;After adding various optimizations to reduce the time spent in the SDF near phase, the solver is now the primary waster of cycles.&lt;/p&gt;
+
+&lt;p&gt;Bullets solver has a few SSE based implementations, but they are AoS not SoA based, so the performance gain is minimal.&lt;/p&gt;
+
+&lt;p&gt;Bullet has a few inefficiencies in how it works, it loves to iterate over every single CollisionObject just to access a single bool, while this is not a problem for small scenes, 
+ it does not scale to the number of physics objects I plan to use.&lt;/p&gt;
+
+&lt;p&gt;I plan to rework this part of Bullet in my local copy, and have already rewritten/removed a few passes Bullet was performing that I did not need.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Pseudo Continuous Collision Detection&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Bullet has some support for CCD(Continuous Collision Detection), but I’m using my own pseudo CCD instead.&lt;/p&gt;
+
+&lt;p&gt;My CCD solution is very simple:&lt;/p&gt;
+
+&lt;p&gt;Calculate the maximum distance an object can travel in a given physics tick based on its current velocity, and expand the point hulls radius to incorporate it.&lt;/p&gt;
+
+&lt;p&gt;At high speeds this causes expansion, but I cannot visually tell that this is happening.&lt;/p&gt;
+
+&lt;p&gt;I run physics at 120 hertz, but I did test it at 60 hertz and it seemed to work fine there also.&lt;/p&gt;
+
+&lt;p&gt;I’m not currently incorporating angular velocity, but I will probably add that at some point.&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;Future Work&lt;/strong&gt;&lt;/p&gt;
 
 &lt;ol&gt;
   &lt;li&gt;The algorithm for placing points within the hull could always use more work.&lt;/li&gt;
   &lt;li&gt;It might also be worth looking into storing a per point radius, this will allow for less points in some situations&lt;/li&gt;
+  &lt;li&gt;Angular Velocity for CCD&lt;/li&gt;
 &lt;/ol&gt;</content><author><name></name></author><summary type="html">Bullet Physics is an open source physics engine that is sometimes used for games and movies.</summary></entry><entry><title type="html">Relative Vertex Normals</title><link href="https://niadb.github.io/gpu/2017/11/05/Higher-Quality-Vertex-Normals.html" rel="alternate" type="text/html" title="Relative Vertex Normals" /><published>2017-11-05T10:20:08-07:00</published><updated>2017-11-05T10:20:08-07:00</updated><id>https://niadb.github.io/gpu/2017/11/05/Higher%20Quality%20Vertex%20Normals</id><content type="html" xml:base="https://niadb.github.io/gpu/2017/11/05/Higher-Quality-Vertex-Normals.html">&lt;p&gt;I use the &lt;a href=&quot;http://jcgt.org/published/0003/02/01/paper.pdf&quot;&gt;Oct16&lt;/a&gt; format to encode my vertex normals, this format is two 8 bit channels in octahedral mapping.&lt;/p&gt;
 
 &lt;p&gt;Most of the time this was sufficient, but under certain conditions artifacts were visible– such as the surface of a smoothly varying sphere using triplanar texturing, whose weights are based on the normals.&lt;/p&gt;

@@ -86,7 +86,7 @@
 
 <p>None of these were a good match for my signed distance fields(<a href="https://en.wikipedia.org/wiki/Signed_distance_function">SDF</a>).</p>
 
-<p>Triangle meshes might seem like a solution, but they have two obvious isssues.</p>
+<p>Triangle meshes might seem like a solution, but they have two obvious issues.</p>
 <ol>
   <li>No volume which leads to penetration issues and bad collision detection</li>
   <li>Uses lots of memory to store the mesh</li>
@@ -95,7 +95,7 @@
 <p>Convex hulls might also seem like a solution, but also have a downsides</p>
 <ol>
   <li>They only work with convex data. To work with concave data you must generate multiple hulls and stick them together.</li>
-  <li>Not very accurate representation of the original shape unless you stitch <em>many</em> of them together, this would be infeasible for the world/terrain shape which is many kilometers in size</li>
+  <li>Not very accurate representation of the original shape unless you stitch <em>many</em> of them together, this would be infeasible for the world/terrain shape which is many kilometres in size</li>
 </ol>
 
 <p>So I decided to extend bullet to directly support <a href="https://en.wikipedia.org/wiki/Signed_distance_function">SDF</a> vs <a href="https://en.wikipedia.org/wiki/Signed_distance_function">SDF</a> collision.</p>
@@ -105,11 +105,11 @@
 <p><strong>Collision Algorithm</strong></p>
 
 <p>The solution I went with is based on generating a point hull for the SDF, a point hull is a list of points that lie within the shapes negative space. 
-   In my implemenation all points in a given hull uses the same radius.</p>
+   In my implementation all points in a given hull uses the same radius.</p>
 
-<p>To peform collision detection between two SDFs, you treat one of them as a point hull and the other as an SDF. You transform each point in the point hull into the space of the SDF and sample the SDF. If the distance to the negative space is &lt;= the point hulls radius, you have a collision.</p>
+<p>To perform collision detection between two SDFs, you treat one of them as a point hull and the other as an SDF. You transform each point in the point hull into the space of the SDF and sample the SDF. If the distance to the negative space is &lt;= the point hulls radius, you have a collision.</p>
 
-<p>I decide which object will act as the point hull based on who has the smaller point hull radius, this ensures consistant collision, and allows for the smaller object to collide against the larger objects full SDF.</p>
+<p>I decide which object will act as the point hull based on who has the smaller point hull radius, this ensures consistent collision, and allows for the smaller object to collide against the larger objects full SDF.</p>
 
 <p>For the world/terrain shape I disable the point hull generation pass, it is always treated as the SDF when colliding.</p>
 
@@ -119,7 +119,7 @@
 
 <p>SDF vs SDF supports both convex and concave shapes.</p>
 
-<p>It also has fewer issues with penetration than triangle meshes since SDFs have proper volume, even if a small object pentrates into  a larger one, it will still be pushed out in the correct direction.</p>
+<p>It also has fewer issues with penetration than triangle meshes since SDFs have proper volume, even if a small object penetrates into  a larger one, it will still be pushed out in the correct direction.</p>
 
 <p><img src="https://niadb.github.io/assets/shapeforpointhull.jpg" alt="SDFShape1" />
   Here is a shape for which we will generate a point hull</p>
@@ -130,29 +130,62 @@
 
 <p><strong>Optimizations</strong> <em>sometimes known as midphase</em></p>
 
-<p>There are numerious ways to optimize this, but here are some that I use. The underlying SDF algorithms are already all SIMD, so this is focused on algorithmic optimizations.</p>
+<p>There are numerous ways to optimize this, but here are some that I use. The underlying SDF algorithms are already all SIMD, so this is focused on algorithmic optimizations.</p>
 
 <p><em>Surface Approximate</em></p>
 
-<p>Instead of sampling the full SDF against all of the points, I first run a pass that only samples eight points on the point hulls AABB within the SDF.  It then uses those eight points to peform a quick rejection of points that incapable of colliding because they are too far away. This often illiminates &gt;90% of the points, so we can skip full SDF evaluation.</p>
+<p>Instead of sampling the full SDF against all of the points, I first run a pass that only samples eight points on the point hulls AABB within the SDF.  It then uses those eight points to perform a quick rejection of points that incapable of colliding because they are too far away. This often eliminates &gt;90% of the points, so we can skip full SDF evaluation.</p>
 
-<p><em>Temporal Collision Sphere</em></p>
+<p><em>Temporal Collision Frame</em></p>
 
-<p>This is a sphere that is specific to a given object vs object collision, it records a rough approximation of the previous collision attempt between the two shapes. If not enough movement or rotation has occured it can early out and skip performing the full near phase.</p>
+<p>This is a frame that is specific to a given object vs object collision, it records a rough approximation of the previous collision attempt between the two shapes.
+ If not enough movement or rotation has occurred it can early out and skip performing the full near phase–the previous contact points are reused.</p>
 
-<p><strong>Handling SDFs with broken disance formulas</strong></p>
+<p><strong>Handling SDFs with broken distance formulas</strong></p>
 
-<p>Some SDFs do not have euclidean correct distances, for these cases I run a fixup step which calculates a correction factor based on the rate of change in the local space of the SDF.</p>
+<p>Otherwise known as <a href="https://en.wikipedia.org/wiki/Lipschitz_continuity">Lipschitz</a> continuous– we want gradients whose magnitude is as close to 1 as possible.</p>
+
+<p>Some SDFs do not have euclidean correct distances, for these cases I run a fix up step which calculates a correction factor based on the rate of change in the local space of the SDF.</p>
 
 <p>My correction algorithm takes the distances calculated for the AABB of the point hull projected into the SDFs space, and compares the true distance between the points against the distance returned by the SDF. It compares all of the points against each other, and uses the largest ratio of (sdf distance/true distance) as the correction factor.</p>
 
-<p>This allows for colliding against fractals etc which often have incorrect distance formulas.</p>
+<p>This allows for colliding against fractals and other complex formulas, which often have incorrect distance formulas.</p>
+
+<p><strong>Performance Notes</strong></p>
+
+<p>In scenes with many moving &amp; colliding objects:</p>
+
+<p>Initially my SDF near phase and Bullets solver were about equal in cycle usage.</p>
+
+<p>After adding various optimizations to reduce the time spent in the SDF near phase, the solver is now the primary waster of cycles.</p>
+
+<p>Bullets solver has a few SSE based implementations, but they are AoS not SoA based, so the performance gain is minimal.</p>
+
+<p>Bullet has a few inefficiencies in how it works, it loves to iterate over every single CollisionObject just to access a single bool, while this is not a problem for small scenes, 
+ it does not scale to the number of physics objects I plan to use.</p>
+
+<p>I plan to rework this part of Bullet in my local copy, and have already rewritten/removed a few passes Bullet was performing that I did not need.</p>
+
+<p><strong>Pseudo Continuous Collision Detection</strong></p>
+
+<p>Bullet has some support for CCD(Continuous Collision Detection), but I’m using my own pseudo CCD instead.</p>
+
+<p>My CCD solution is very simple:</p>
+
+<p>Calculate the maximum distance an object can travel in a given physics tick based on its current velocity, and expand the point hulls radius to incorporate it.</p>
+
+<p>At high speeds this causes expansion, but I cannot visually tell that this is happening.</p>
+
+<p>I run physics at 120 hertz, but I did test it at 60 hertz and it seemed to work fine there also.</p>
+
+<p>I’m not currently incorporating angular velocity, but I will probably add that at some point.</p>
 
 <p><strong>Future Work</strong></p>
 
 <ol>
   <li>The algorithm for placing points within the hull could always use more work.</li>
   <li>It might also be worth looking into storing a per point radius, this will allow for less points in some situations</li>
+  <li>Angular Velocity for CCD</li>
 </ol>
 
 
