@@ -92,17 +92,18 @@
 
 <p><strong>Algorithm</strong></p>
 
-<p>This algorithm uses a fixed sized amount of memory for textures on the GPU.</p>
+<p>This algorithm uses multiple texture arrays, and a structured buffer that indicates per material, which array to sample from.</p>
 
-<p>I also limit all textures to square powers of 2,  the only sizes supported are 256,512,1024, and 2048.</p>
+<p>It uses a fixed sized amount of memory for textures on the GPU.</p>
+
+<p>Textures are limited to square powers of 2,  the only sizes supported are 256,512,1024, and 2048. 
+  This reduces the number of arrays we will need to a reasonable number.</p>
 
 <p>I pre-generated a texture array that contains all of the mips of size 256 and under, for all textures.</p>
 
 <p>I also allocate fixed sized arrays for 512,1024 and 2048; with the larger sizes having progressively fewer slots.</p>
 
-<p>I’ll refer to each of these arrays as a layer.</p>
-
-<p><em>Number of slots</em> : Here are the number of slots I have per layer, these numbers are mostly arbitrary.</p>
+<p><em>Number of slots</em> : Here are the number of slots I have per array, these numbers are mostly arbitrary.</p>
 
 <ul>
   <li>256: # of textures</li>
@@ -111,13 +112,13 @@
   <li>2048: 8 slots</li>
 </ul>
 
-<p>Here is a visualization of the layers.</p>
+<p>Here is a visualization of the arrays.</p>
 
 <p><img src="https://niadb.github.io/assets/virtual_texture_layers.jpg" alt="SDFShape2" />
   <em>Yellow is 256, Green is 512, Blue is 1024, and Red is 2048.<br />
   I force everything to use 256 past a certain distance to reduce divergence</em></p>
 
-<p>In addition a structured buffer is used as an indirection mapping; pass in the material ID, and retrieve which array to sample from(the layer), and which slot in the array.</p>
+<p>A structured buffer is used as an indirection mapping; pass in the material ID, and retrieve which array to sample from, and which slot in the array.</p>
 
 <p><strong>Prioritizing Textures</strong></p>
 
